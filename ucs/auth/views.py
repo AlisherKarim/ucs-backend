@@ -24,6 +24,13 @@ class RegisterView(APIView):
             user = User.objects.get(username=request.data['username'])
             user.set_password(request.data['password'])
             user.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+            refresh = RefreshToken.for_user(user)
+            return Response({
+                'user': serializer.data,
+                'token': {
+                    'refresh': str(refresh),
+                    'access': str(refresh.access_token),
+                }
+            }, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
